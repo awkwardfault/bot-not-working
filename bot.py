@@ -38,14 +38,21 @@ async def on_command_error(ctx, error):
         print(f'Ignoring exception in command {ctx.command.name}', file=sys.stderr)
         traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr) 
         
-@client.command()
-async def load(ctx, extension):
-    client.load_extension(F'cogs.{extension}')   
+        
+if __name__ == "__main__":
+    
+    for file in os.listdir("./commands"):
+        if file.endswith(".py"):
+            extension = file[:-3]
+            try:
+                client.load_extension(f"commands.{extension}")
+                print(f"Loaded extension '{extension}'")
+            except Exception as e:
+                exception = f"{type(e).__name__}: {e}"
+                print(f"Failed to load extension {extension}\n{exception}")
 
      
-for filename in os.listdir('./cogs'):
-    if filename.endswith('.py'):
-        client.load_extension(f'cogs.{filename[:-3]}') 
+ 
          
 
 client.run('DISCORD_TOKEN')
