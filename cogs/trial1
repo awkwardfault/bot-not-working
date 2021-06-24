@@ -1,0 +1,63 @@
+from typing import Type
+from discord.enums import Status
+import requests
+import pprint
+import discord
+
+from discord.ext import commands
+from discord.ext.commands import Context
+
+class example(commands.Cog):
+    def __init__(self,jikan):
+        self.jikan = jikan
+
+    # Events
+    @commands.Cog.listener()
+    async def on_ready(self):
+        print('Jikan has connected to bot!')
+
+
+
+    anime_name = str
+    api_base_url = "https://api.jikan.moe/v3"
+    endpoint_path = f"/search/anime?q={anime_name}&page=1&limit=1"
+    endpoint = f"{api_base_url}{endpoint_path}"
+
+    @commands.command()
+    async def anime(self,ctx : Context , name):
+        
+        api_base_url = "https://api.jikan.moe/v3"
+        endpoint_path = f"/search/anime?q={name}&page=1&limit=1"
+        endpoint = f"{api_base_url}{endpoint_path}"
+        r= requests.get(endpoint)
+        data = r.json()
+        results = data['results']
+        for result in results:
+            _title = result['title']
+            _description = result['synopsis']
+            _rated = result['rated']
+            _episodes = result['episodes']
+            _score = result['score']
+            _start_date = result['start_date']
+            _end_date = result['end_date']
+            _image = result['image_url']
+            _link = result['url']
+            _type = result['type']
+            _status = result['airing']
+
+            em = discord.Embed(title = f'{_title}',url = f'{_link}',
+            description = f'{_description}')
+            em.set_thumbnail(url='https://upload.wikimedia.org/wikipedia/commons/7/7a/MyAnimeList_Logo.png')
+            em.add_field(name= '⌛Running', value= f'{_status}', inline=True)
+            em.add_field(name= '🗃️Type', value= f'{_type}', inline=True)
+            em.add_field(name='🗓️Run Time:',value=f'from {_start_date} to {_end_date}',inline=False)
+            em.add_field(name='🗄️Total Episodes',value=f'{_episodes}',inline=True)
+            em.add_field(name= '📊Rating',value=f'{_score}/10',inline=True)
+            em.add_field(name= '🛑 Rated', value=f'{_rated}',inline=False)
+            em.set_image(url= _image)
+            em.set_footer(text='Source: MyAnimeList')
+    
+
+        await ctx.send(embed = em)
+def setup(jikan):
+    jikan.add_cog(example(jikan))      
